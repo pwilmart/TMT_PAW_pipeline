@@ -94,35 +94,41 @@ There are PSM aggregations choices. I use summation of the reporter ion peak hei
 
 ![slide 15](images/Slide15.png)
 
-These details are for multiple-plex TMT experiments.
+During protein inference, the LC runs have to be assigned to “samples”. Individual runs are samples in single shot experiments. In experiments with fractionation, sets of LC runs come from one sample. In TMT experiments, the samples associated with TMT channels are hidden from the protein inference algorithm. Each fractionated TMT plex in a multiple-plex experiment is effectively a “sample” as far as the protein inference step is concerned. After protein inference and protein grouping, we have a table of identified proteins, protein groups, or protein families. There is a higher-level peptide summary file that lists the peptides for each protein and the “samples” they were seen in. There is also information in this file about the shared or unique status of each peptide with respect to the final list of proteins. For each ”sample”, there are more complete lists of peptides that include some PSM-level information and have the MS2 scan numbers for the PSMs. The “add_TMT_intensities.py” script uses this information along with the reporter ion intensities for each MS2 scan number in each LC run to compute the total reporter ion values for each protein. Pseudo code is shown in the slide.
 
 ---
 
 ![slide 16](images/Slide16.png)
 
-The PAW pipeline is flexible, so there are options for how to process data from multiple experiments. They can be processed in chunks, or all data analyzed in one go. Comet search parameters should be the same for data processed in chunks. Any data to be combined across multiple plexes needs to have a combined protein inference done. If we process the data in chunks, we can copy all the filtered top-hit files into a single folder and run the protein inference script. We need unified quantitative data per protein, and this is the safest way to do that.
+These details are for multiple-plex TMT experiments.
 
 ---
 
 ![slide 17](images/Slide17.png)
 
-A typical grouped protein summary file would have the data in the grey columns. The quantitative summary script add the reporter ion intensities totals for each TMT experiment (plex). The example here has three plexes.
+The PAW pipeline is flexible, so there are options for how to process data from multiple experiments. They can be processed in chunks, or all data analyzed in one go. Comet search parameters should be the same for data processed in chunks. Any data to be combined across multiple plexes needs to have a combined protein inference done. If we process the data in chunks, we can copy all the filtered top-hit files into a single folder and run the protein inference script. We need unified quantitative data per protein, and this is the safest way to do that.
 
 ---
 
 ![slide 18](images/Slide18.png)
 
-Single factor data scalings do not work for TMT data from multiple plexes (see https://pwilmart.github.io/TMT_analysis_examples/IRS_validation.html). The MS2 scans are dynamically selected in real time by the instrument (next slide) and the selection resembles a pseudo random sampling. Because reporter ions are measured together in a single scan, and aggregation within a TMT plex preserves this pattern, each plex will have a unique pattern of reporter ion intensities. Individual channels from TMT plexes will cluster together, each plex will a distinct cluster, and the clustering pattern will resemble typical batch effects. In fact, given a well-balanced study design, some batch correction methods can work with TMT data. IRS was designed to put a common yardstick into each plex so that the measurement scales could be figured out and adjusted to be the same without any balanced study design constraints. This preserves the natural reporter ion peak height measurement scale between plexes and extends the number of samples that can be simultaneously measured. This avoids transformations to ratios and their associated limitations.
+A typical grouped protein summary file would have the data in the grey columns. The quantitative summary script add the reporter ion intensities totals for each TMT experiment (plex). The example here has three plexes.
 
 ---
 
 ![slide 19](images/Slide19.png)
 
-Image a specific peptide eluting from the column in the same fraction in three different TMT experiments. The instrument may be performing better or worse at each of the three times. The dynamic way the instrument selects scans is the biggest variable factor. A chromatography peak may be sampled for peptide fragmentation at any time it gets above a minimum intensity (dotted lines). The samplings can be near the top of the peak, near the leading or trailing edges of the peak, or somewhere in between. The reporter ion intensities depend on the analyte’s relative abundance (higher near the peak and lower near the baseline). TMT labeling can accommodate more complicated liquid chromatography than many other types of quantitation. Peptides may be present in more than one charge state and in more than one LC run. Modified peptide forms also cause multiple peaks. Samples with extensive modifications can complicate TMT labeling analyses. Protein summarization and reference channels allows more freedom from analytic platform variability. IRS does not require the same sets of peptides for proteins in each of the plexes. If there are measured reporter ions for the reference channel protein in all plexes, the protein abundance estimates can be matched across plexes.
+Single factor data scalings do not work for TMT data from multiple plexes (see https://pwilmart.github.io/TMT_analysis_examples/IRS_validation.html). The MS2 scans are dynamically selected in real time by the instrument (next slide) and the selection resembles a pseudo random sampling. Because reporter ions are measured together in a single scan, and aggregation within a TMT plex preserves this pattern, each plex will have a unique pattern of reporter ion intensities. Individual channels from TMT plexes will cluster together, each plex will a distinct cluster, and the clustering pattern will resemble typical batch effects. In fact, given a well-balanced study design, some batch correction methods can work with TMT data. IRS was designed to put a common yardstick into each plex so that the measurement scales could be figured out and adjusted to be the same without any balanced study design constraints. This preserves the natural reporter ion peak height measurement scale between plexes and extends the number of samples that can be simultaneously measured. This avoids transformations to ratios and their associated limitations.
 
 ---
 
 ![slide 20](images/Slide20.png)
+
+Image a specific peptide eluting from the column in the same fraction in three different TMT experiments. The instrument may be performing better or worse at each of the three times. The dynamic way the instrument selects scans is the biggest variable factor. A chromatography peak may be sampled for peptide fragmentation at any time it gets above a minimum intensity (dotted lines). The samplings can be near the top of the peak, near the leading or trailing edges of the peak, or somewhere in between. The reporter ion intensities depend on the analyte’s relative abundance (higher near the peak and lower near the baseline). TMT labeling can accommodate more complicated liquid chromatography than many other types of quantitation. Peptides may be present in more than one charge state and in more than one LC run. Modified peptide forms also cause multiple peaks. Samples with extensive modifications can complicate TMT labeling analyses. Protein summarization and reference channels allows more freedom from analytic platform variability. IRS does not require the same sets of peptides for proteins in each of the plexes. If there are measured reporter ions for the reference channel protein in all plexes, the protein abundance estimates can be matched across plexes.
+
+---
+
+![slide 21](images/Slide21.png)
 
 The IRS design is straight forward. Now that we have 18 channels, constructing balanced plexes would be easier and plex average could substitute for reference channels. IRS was developed when we had 10-plex kits. It helps to have the reference channels be as identical as possible. The best strategy is to pool aliquots of protein from all samples being labeled. Aliquots of that pooled mixture can be digested, and the peptide digests pooled. Aliquots of the pooled peptide digests can serve as the identical reference channels. The pooled protein mixture does not have to include protein from all samples in an experiment (something that may be difficult in larger studies). However, it should be a mixture of representative samples (the more samples the better).
 
@@ -130,7 +136,7 @@ Averages of the two reference channels in each plex determines the local measure
 
 ---
 
-![slide 21](images/Slide21.png)
+![slide 22](images/Slide22.png)
 
 The pandas Python script that performs IRS adjustments reads an annotated protein summary file from the PAW pipeline (where TMT intensities have been added). This is usually the summary file after the extended protein grouping, but it can also be the protein file after basic parsimony analysis. The annotations address two issues. One is that which protein are considered contaminants depends on the samples and cannot be reliable done in a fully automated way. Knowledge of the samples and the biological questions need to be used to decide contaminants. Any proteins that have any text in the cells in the Filter column are excluded from quantification (common contaminants, additional contaminants, decoys, etc.). Some of these labels are already specified (matches from the common contaminants FASTA collection and decoy sequences are taken care of). Some samples that folks study may contain blood proteins or keratins (two classes of proteins frequently in common contaminants databases). There may need to be editing of the text in the Filter column (either adding additional contaminant proteins or maybe clearing the text so that proteins will be quantified). Rows (proteins) with any text in cells in the Filter column will be moved to the bottom of the IRS-adjusted results table. Any blank cells in the Filter column denote quantifiable proteins.
 
@@ -140,7 +146,7 @@ The protein summary files from PAW are tab-delimited text files. Those can be op
 
 ---
 
-![slide 22](images/Slide22.png)
+![slide 23](images/Slide23.png)
 
 The pandas Python script that performs IRS adjustments does the IRS adjustments and a few other data housekeeping tasks. Any proteins that have any text in the cells in the Filter column are excluded from quantification (common contaminants, additional contaminants, decoys, etc.). Rows (proteins) with any text in cells in the Filter column will be moved to the bottom of the results table. Any blank cells in the Filter column denote quantifiable proteins. Some of the typical proteomics columns are retained at the left of the results table (shown in grey above). The unaltered TMT intensity data by plex are the next blocks of columns (shown in light gold, blue, and green). The grand total intensities of each plexes’s channels are used to compute an experiment-wide target intensity total and a global scaling factor is applied to get all channels onto a common total intensity scale. This is called a “sample loading” (SL) adjustment (orange data columns). The SL-adjustment is only applied to quantifiable proteins. There will be lower abundance proteins that have data missing by TMT plex (the yellow highlighted cells [the middle bock above should have yellow bands that cover all channels – the last channel is incorrectly colored orange]). Averages of the reference channels in each plex are used to compute the IRS scaling factors for each protein in each plex. The right-most columns are the final IRS-adjusted columns. The table is sorted by decreasing experiment-wide average total reporter ion intensity and then blocked by number of plexes with missing data (red bands). The darker green rows have no missing data by plex. Then data is blocked by protein where data was missing in one of the three plexes. Next are the proteins where data was missing in any 2 of the 3 plexes. Non-missing data in these proteins gets IRS adjusted using the plexes whare it was seen. We do not end up a perfect, continuous common intensity scale for all proteins as a function of missingness. Each collection of rows that have data in the same plexes are locally on a common intensity scale after IRS. However, the SL-adjustment gets these different scales into reasonable alignment.
 
@@ -148,19 +154,19 @@ The results table written by the IRS script is large but well organized and has 
 
 ---
 
-![slide 23](images/Slide23.png)
+![slide 24](images/Slide24.png)
 
 This is some data from a larger study (nine 10-plexes) where two reference channels were used per plex. There were three unused channels experiment-wide, and an extra reference channel was added to three of the plexes. On the left, are the reference channels before IRS. We see that the 3 reference channels within each plex are highly similar (very tight scatter plots - highlighted in red rectangles). These identical channels are not very identical between plexes, however. We have scatter plots indicating high variability – too high for good statistical testing. On the right, we have the reference channel intensities after IRS adjustment. We see that all reference channels are nearly identical as expected.
 
 ---
 
-![slide 24](images/Slide24.png)
+![slide 25](images/Slide25.png)
 
 We had three plexes where we had an extra reference channel. We did IRS using the other two channels and then used the third reference channel like a canary in a coal mine. This is a proper validation of IRS because these reference channels were not used to compute the IRS scaling factors. Note that lower abundance proteins have increase variance, a common feature in most quantitative proteomics data.
 
 ---
 
-![slide 25](images/Slide25.png)
+![slide 26](images/Slide26.png)
 
 IRS does not allow unlimited plexing. There is a cost associated with the IRS concept. We typically restrict quantification in IRS experiments to the proteins present in all plexes. It is possible (untested assertion) to extend statistical testing to proteins with data missing by plex, but this is not a trivial exercise. The requirement of protein present in all plexes creates a union versus intersection challenge. The total number of proteins identified in a multi-plex experiment end up being the union of protein identifications in each plex. That grows logarithmically and maxes out after some number of plexes. The intersection depends on instrument performance within each plex and how consistently low abundance proteins have peptides that are sampled by the instrument. There are always some proteins only detected in one plex. We can expect a roughly linear decrease in the intersection of the identifications as a function of the number of plexes.
 
@@ -168,7 +174,7 @@ On the left, we see that protein IDs increase from about 3300 to 4300 for the si
 
 ---
 
-![slide 26](images/Slide26.png)
+![slide 27](images/Slide27.png)
 
 No method in quantitative proteomics is perfect. That is true at all levels. To label or not to label, to fractionate or not fractionate, measure reporter ions in MS2 scans or in MS3 scans, one plex or more than one plex, etc. There are strengths and weaknesses for every choice at every step. IRS is kind of amazing, to be honest. It fixes one specific source of data distortion, and it fixes it very well. The main downside is the sense of loss as the union of protein IDs diverges from the quantifiable intersection. This despair can be alleviated by considering how much intensity (protein amount) you can quantify rather than number of proteins that can be quantified. The reference channel pairs also provide some much-needed quality control in these experiments.
 
