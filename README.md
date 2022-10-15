@@ -104,6 +104,8 @@ During protein inference, the LC runs have to be assigned to “samples”. Indi
 
 These details are for multiple-plex TMT experiments.
 
+> Plubell DL, Wilmarth PA, Zhao Y, Fenton AM, Minnier J, Reddy AP, Klimek J, Yang X, David LL, Pamir N. Extended Multiplexing of Tandem Mass Tags (TMT) Labeling Reveals Age and High Fat Diet Specific Proteome Changes in Mouse Epididymal Adipose Tissue. Mol Cell Proteomics. 2017 May;16(5):873-890. doi: 10.1074/mcp.M116.065524. Epub 2017 Mar 21. PMID: 28325852; PMCID: PMC5417827.
+
 ---
 
 ![slide 17](images/Slide17.png)
@@ -134,7 +136,9 @@ Image a specific peptide eluting from the column in the same fraction in three d
 
 The IRS design is straight forward. Now that we have 18 channels, constructing balanced plexes would be easier and plex average could substitute for reference channels. IRS was developed when we had 10-plex kits. It helps to have the reference channels be as identical as possible. The best strategy is to pool aliquots of protein from all samples being labeled. Aliquots of that pooled mixture can be digested, and the peptide digests pooled. Aliquots of the pooled peptide digests can serve as the identical reference channels. The pooled protein mixture does not have to include protein from all samples in an experiment (something that may be difficult in larger studies). However, it should be a mixture of representative samples (the more samples the better).
 
-Averages of the two reference channels in each plex determines the local measurement scale. The IRS factors per protein put the local scales onto a common global scale. The IRS factors are used to scale all channels in each plex (biological samples in addition to the reference channels) collectively. IRS scaling is done independently for each quantifiable protein in the experiment.
+Averages of the two reference channels in each plex determines the local measurement scale. The IRS factors per protein put the local scales onto a common global scale. The IRS factors are used to scale all channels in each plex (biological samples in addition to the reference channels) collectively. IRS scaling is done independently for each quantifiable protein in the experiment. The [publication below](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5417827/pdf/zjw873.pdf) was where IRS was first presented.
+
+> Plubell DL, Wilmarth PA, Zhao Y, Fenton AM, Minnier J, Reddy AP, Klimek J, Yang X, David LL, Pamir N. Extended Multiplexing of Tandem Mass Tags (TMT) Labeling Reveals Age and High Fat Diet Specific Proteome Changes in Mouse Epididymal Adipose Tissue. Mol Cell Proteomics. 2017 May;16(5):873-890. doi: 10.1074/mcp.M116.065524. Epub 2017 Mar 21. PMID: 28325852; PMCID: PMC5417827.
 
 ---
 
