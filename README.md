@@ -30,7 +30,7 @@ The PAW pipeline (https://github.com/pwilmart/PAW_pipeline) is a series of Pytho
 
 ![slide 5](images/Slide5.png)
 
-The TMT reporter ion peak heights are extracted during data conversions (the first step). They are summarized into peptide and protein totals ONLY after proteins have been inferred (one of the last steps). The reporter ion channel intensity columns get added to the top-hit summary files (and are retained in the filtered top-hit summary files). MS2 scan sequence assignments are not trivially related to the final list of inferred proteins, so it is not trivial to directly aggregate PSM quantitative data to higher levels. In other words, propagating quantitative data through the pipeline (from top to bottom in the diagram) is not done.
+The TMT reporter ion peak heights are extracted during data conversions (the first step). The PAW pipeline does not do any correction factors for label reagent isotopic purity (see https://pwilmart.github.io/blog/2022/08/20/TMT-channel-crosstalk for a deeper dive on the topic). The peak heights are summarized into peptide and protein intensity totals **only** after proteins have been inferred (one of the last steps). The reporter ion channel intensity columns get added to the top-hit summary files (and are retained in the filtered top-hit summary files). MS2 scan sequence assignments are not trivially related to the final list of inferred proteins, so it is not trivial to directly aggregate PSM quantitative data to higher levels. In other words, propagating quantitative data through the pipeline (from top to bottom in the diagram) is not done.
 
 ---
 
@@ -56,19 +56,19 @@ Although the reporter ion data is not really used until after protein inference,
 
 ![slide 9](images/Slide9.png)
 
-Controlling false discovery rates in bottom-up proteomics experiments is challenging. We keep Comet searches as simple as possible while capturing sufficient quantitative data for reliable analysis. We do not configure Comet to identify everything in the samples. We try to capture most of the signal, though.
+The choice of FASTA file is critical in bottom-up proteomics, and discussed in https://pwilmart.github.io/blog/2020/09/19/shotgun-quantification-part2. Controlling false discovery rates in bottom-up proteomics experiments is also challenging. We keep Comet searches as simple as possible while capturing sufficient quantitative data for reliable analysis. We do not configure Comet to identify everything in the samples. We try to capture most of the signal, though.
 
 ---
 
 ![slide 10](images/Slide10.png)
 
-The PAW pipeline is well documented at GitHub (https://github.com/pwilmart/PAW_pipeline). It uses the target/decoy method for PSM FDR estimation. A PeptideProphet discriminant function is used to better distinguish correct matches from incorrect matches. Subclassing peptides and doing independent FDR control makes the FDR analysis adaptive to the data.
+The PAW pipeline is well documented at GitHub (https://github.com/pwilmart/PAW_pipeline). It uses the target/decoy method for PSM FDR estimation. A PeptideProphet discriminant function is used to better distinguish correct matches from incorrect matches. Subclassing peptides and doing independent FDR control makes the FDR analysis adaptive to the data. You can read more about some of the unique aspects of the PAW pipeline at https://pwilmart.github.io/blog/2021/06/06/PAW-pipeline-backstory.
 
 ---
 
 ![slide 11](images/Slide11.png)
 
-The datasets in these experiments are large. The ID rate (fraction of scans with a confident peptide sequence assignment) is typically 20% to 40% in real experiments. New data files are created for the PSMs that pass the FDR cutoff to speed up downstream processing (and simplify coding). The filtered top-hit files have all the information for protein inference. Protein inference is basically grouping peptides by protein, masking I and L residues, and doing peptide set comparisons. Identical peptide sets are limped together into protein groups. Peptide sets that are formal subsets of other peptide sets have their proteins removed from the inferred lists (this is the parsimony part). We require two independent peptide matches to proteins to eliminate noisy, low abundance proteins. The PAW pipeline has an extended grouping algorithm to combine highly homologous proteins (nearly identical peptide sets) into protein families.
+The datasets in these experiments are large. The ID rate (fraction of scans with a confident peptide sequence assignment) is typically 20% to 40% in real experiments. New data files are created for the PSMs that pass the FDR cutoff to speed up downstream processing (and simplify coding). The filtered top-hit files have all the information for protein inference. Protein inference is basically grouping peptides by protein, masking I and L residues, and doing peptide set comparisons. Identical peptide sets are lumped together into protein groups. Peptide sets that are formal subsets of other peptide sets have their proteins removed from the inferred lists (this is the parsimony part). We require two independent peptide matches to proteins to eliminate noisy, low abundance proteins. The PAW pipeline has an extended grouping algorithm to combine highly homologous proteins (nearly identical peptide sets) into protein families.
 
 NOTE: quantitative data is not considered during protein inference. All PSMs, even those without usable quant data, are needed for the best protein inference.
 
@@ -76,7 +76,9 @@ NOTE: quantitative data is not considered during protein inference. All PSMs, ev
 
 ![slide 12](images/Slide12.png)
 
-This question is the heart and soul of bottom-up quantitative proteomics. In principle, any peptide can provide the data for protein quant. The lower-level data is noisier and combining PSM data into protein summaries can result in better data. Not all peptides have a one-to-one relationship with their parent proteins. Some peptides can originate from more than one protein and would have mixed quantitative data. We need to define peptides with one-to-one relationships (unique peptides) from those with mixed relationships (shared peptides). Defining shared and unique depends on the protein inference results. Only after we have a final list of proteins, protein groups, and protein families can we define which peptides are unique and shared. The different contexts mentioned above can have small effects on the final results or very profound effects. It depends on many factors, such as, the FASTA file peptide redundancy, and the sample proteins and how similar their sequences might be.
+This question is at the heart and soul of bottom-up quantitative proteomics. I have written a couple of blog posts about the topic: https://pwilmart.github.io/blog/2019/09/21/shotgun-quantification and https://pwilmart.github.io/blog/2020/09/19/shotgun-quantification-part2.
+
+In principle, any peptide can provide the data for protein quant. The lower-level data is noisier and combining PSM data into protein summaries can result in better data. Not all peptides have a one-to-one relationship with their parent proteins. Some peptides can originate from more than one protein and would have mixed quantitative data. We need to define peptides with one-to-one relationships (unique peptides) from those with mixed relationships (shared peptides). Defining shared and unique depends on the protein inference results. Only after we have a final list of proteins, protein groups, and protein families can we define which peptides are unique and shared. The different contexts mentioned above can have small effects on the final results or very profound effects. It depends on many factors, such as, the FASTA file peptide redundancy, and the sample proteins and how similar their sequences might be.
 
 ---
 
@@ -88,7 +90,7 @@ To see how data quality improves by aggregating PSMs, we have data where a mouse
 
 ![slide 14](images/Slide14.png)
 
-There are PSM aggregations choices. I use summation of the reporter ion peak heights from all PSMs associated with **unique** peptides for each protein. Summing is similar to weighted averaging because more intense reporter ions contribute more to the total. The instrument gets ragged on the low end, so a trimmed average reporter ion intensity test is used. The highest and lowest intensity are removed, the remaining channels averaged and tested against a user specified value (typically 500). If a PSMs set of reporter ions fail the test, they are all set to zero (so they do not contribute to protein totals). Combining multiple PSMs into protein values potentially removes many missing values at the PSM level. We will have a more reasonable pattern of missing values at the protein level. We usually use a sentinel value of 150 for any protein channel zero replacements. We will have a few proteins that we identify without any associated quant data. Quant is a subset of ID.
+There are PSM aggregations choices. I use summation of the reporter ion peak heights from all PSMs associated with **unique** peptides for each protein. Summing is similar to weighted averaging because more intense reporter ions contribute more to the total. There is missing data in TMT experiments (but far less than other quant methods) and what to do about missing data is an evergreen question (https://pwilmart.github.io/blog/2018/12/12/TMT-zero-replacement is a blog post from 2018). The instrument gets ragged on the low end, so a trimmed average reporter ion intensity test is used. The highest and lowest intensity are removed, the remaining channels averaged and tested against a user specified value (typically 500). If a PSMs set of reporter ions fail the test, they are all set to zero (so they do not contribute to protein totals). Combining multiple PSMs into protein values potentially removes many missing values at the PSM level. We will have a more reasonable pattern of missing values at the protein level. We usually use a sentinel value of 150 for any protein channel zero replacements. We will have a few proteins that we identify without any associated quant data. Quant is a subset of ID.
 
 ---
 
@@ -178,6 +180,8 @@ On the left, we see that protein IDs increase from about 3300 to 4300 for the si
 
 No method in quantitative proteomics is perfect. That is true at all levels. To label or not to label, to fractionate or not fractionate, measure reporter ions in MS2 scans or in MS3 scans, one plex or more than one plex, etc. There are strengths and weaknesses for every choice at every step. IRS is kind of amazing, to be honest. It fixes one specific source of data distortion, and it fixes it very well. The main downside is the sense of loss as the union of protein IDs diverges from the quantifiable intersection. This despair can be alleviated by considering how much intensity (protein amount) you can quantify rather than number of proteins that can be quantified. The reference channel pairs also provide some much-needed quality control in these experiments.
 
+I do not think of the PAW pipeline as a TMT "best practices" pipeline. It is more a pipeline that avoids most [**TMT bad practices**](https://pwilmart.github.io/blog/2021/12/17/TMT-bad-practices). I hope this presentation has shed some light on what TMT data processing entails and can help you make better use of whatever TMT analysis software you prefer.
+
 ---
 
-Phillip Wilmarth <br> PSR Core, OHSU <br> October 13, 2022
+Phillip Wilmarth <br> PSR Core, OHSU <br> October 14, 2022
